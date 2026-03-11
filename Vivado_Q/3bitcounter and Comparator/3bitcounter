@@ -1,0 +1,63 @@
+library IEEE;
+use IEEE.STD_LOGIC_1164.ALL;
+
+entity counter3_jk is
+    port (
+        clk   : in  std_logic;
+        reset : in  std_logic;
+        Q     : out std_logic_vector(2 downto 0)
+    );
+end counter3_jk;
+
+architecture Structural of counter3_jk is
+    -- Internal signals to connect the FFs
+    signal q_int  : std_logic_vector(2 downto 0);
+    signal and_gate : std_logic;
+begin
+    -- Logic for the J and K inputs:
+    -- Bit 0 toggles every clock (J=1, K=1)
+    -- Bit 1 toggles if Q0 is '1'
+    -- Bit 2 toggles if (Q0 AND Q1) are '1'
+    
+    and_gate <= q_int(0) and q_int(1);
+
+    -- Flip-Flop 0 (LSB)
+    FF0: entity work.JK_FF 
+        port map(
+            J      => '1', 
+            K      => '1', 
+            clk    => clk, 
+            reset  => reset, 
+            preset => '0', 
+            Q      => q_int(0),
+            Q_bar  => open
+        );
+
+    -- Flip-Flop 1
+    FF1: entity work.JK_FF 
+        port map(
+            J      => q_int(0), 
+            K      => q_int(0), 
+            clk    => clk, 
+            reset  => reset, 
+            preset => '0', 
+            Q      => q_int(1),
+            Q_bar  => open
+        );
+
+    -- Flip-Flop 2 (MSB)
+    FF2: entity work.JK_FF 
+        port map(
+            J      => and_gate, 
+            K      => and_gate, 
+            clk    => clk, 
+            reset  => reset, 
+            preset => '0', 
+            Q      => q_int(2),
+            Q_bar  => open
+        );
+
+    -- Output assignment
+    Q <= q_int;
+
+end Structural;
