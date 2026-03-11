@@ -1,0 +1,37 @@
+library IEEE;
+use IEEE.STD_LOGIC_1164.ALL;
+
+entity clk_div2_tb is
+end clk_div2_tb;
+
+architecture Behavioral of clk_div2_tb is
+
+    component clk_div2_behavioral
+        Port (
+            CLK_IN  : in  STD_LOGIC;
+            CLK_OUT : out STD_LOGIC
+        );
+    end component;
+
+    signal CLK_IN  : STD_LOGIC := '0';
+    signal CLK_OUT : STD_LOGIC;
+
+begin
+
+    UUT: clk_div2_behavioral
+        port map (
+            CLK_IN  => CLK_IN,
+            CLK_OUT => CLK_OUT
+        );
+
+    clk_process : process
+    begin
+        while true loop
+            CLK_IN <= '0';
+            wait for 5 ns;
+            CLK_IN <= '1';
+            wait for 5 ns;
+        end loop;
+    end process;
+
+end Behavioral;
