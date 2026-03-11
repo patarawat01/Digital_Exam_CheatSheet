@@ -1,0 +1,65 @@
+library IEEE;
+use IEEE.STD_LOGIC_1164.ALL;
+
+entity tb_Checkpoint2_Top is
+-- Testbench ไม่มี Port ครับ
+end tb_Checkpoint2_Top;
+
+architecture Behavioral of tb_Checkpoint2_Top is
+
+    -- 1. ดึง Component ของ Top Module มาใช้
+    component Checkpoint2_Top
+        Port ( clk   : in  STD_LOGIC;
+               reset : in  STD_LOGIC;
+               seg   : out STD_LOGIC_VECTOR (6 downto 0);
+               an    : out STD_LOGIC_VECTOR (3 downto 0));
+    end component;
+
+    -- 2. สร้าง Signals ไว้จำลองการเชื่อมต่อ
+    signal clk_tb   : STD_LOGIC := '0';
+    signal reset_tb : STD_LOGIC := '0';
+    signal seg_tb   : STD_LOGIC_VECTOR (6 downto 0);
+    signal an_tb    : STD_LOGIC_VECTOR (3 downto 0);
+
+    -- จำลอง Clock ของบอร์ด Basys3 ที่ 100 MHz (คาบ = 10 ns)
+    constant CLK_PERIOD : time := 10 ns;
+
+begin
+
+    -- 3. Port Map เชื่อมสายจำลองเข้ากับวงจร
+    uut: Checkpoint2_Top port map (
+        clk   => clk_tb,
+        reset => reset_tb,
+        seg   => seg_tb,
+        an    => an_tb
+    );
+
+    -- =========================================================
+    -- Process สร้างสัญญาณ Clock (100 MHz)
+    -- =========================================================
+    clk_process : process
+    begin
+        clk_tb <= '0';
+        wait for CLK_PERIOD / 2;
+        clk_tb <= '1';
+        wait for CLK_PERIOD / 2;
+    end process;
+
+    -- =========================================================
+    -- Process ป้อนสัญญาณ Reset (Stimulus)
+    -- =========================================================
+    stim_proc: process
+    begin
+        -- เริ่มต้นด้วยการกดปุ่ม Reset ค้างไว้ 50 ns เพื่อเคลียร์ค่า Counter ให้เป็น 0
+        reset_tb <= '1';
+        wait for 50 ns;
+        
+        -- ปล่อยปุ่ม Reset เพื่อให้ Counter เริ่มนับ
+        reset_tb <= '0';
+        
+        -- จากนี้ปล่อยให้ Clock เดินไปเรื่อยๆ เพื่อดูค่า seg_tb ที่เปลี่ยนไปตาม Counter
+        -- (ระยะเวลาที่ใช้ขึ้นอยู่กับว่าคุณปรับ Clock_Divider ไว้ที่เท่าไหร่)
+        wait;
+    end process;
+
+end Behavioral;
