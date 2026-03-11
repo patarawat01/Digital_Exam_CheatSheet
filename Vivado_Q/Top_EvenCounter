@@ -1,0 +1,53 @@
+library IEEE;
+use IEEE.STD_LOGIC_1164.ALL;
+
+entity Top_EvenCounter is
+    Port ( clk   : in  STD_LOGIC;
+           reset : in  STD_LOGIC;
+           seg   : out STD_LOGIC_VECTOR (6 downto 0);
+           an    : out STD_LOGIC_VECTOR (3 downto 0)
+         );
+end Top_EvenCounter is
+
+architecture Structural of Top_EvenCounter is
+
+    -- ประกาศ Components
+    component D_FF
+        Port ( D, CLK, RESET : in STD_LOGIC; Q, Q_bar : out STD_LOGIC);
+    end component;
+
+    component Clock_Divider
+        Port ( clk_in, reset : in STD_LOGIC; clk_out : out STD_LOGIC);
+    end component;
+
+    component sseg_decoder
+        Port ( bin : in STD_LOGIC_VECTOR(2 downto 0); 
+               seg : out STD_LOGIC_VECTOR(6 downto 0); 
+               an : out STD_LOGIC_VECTOR(3 downto 0));
+    end component;
+
+    signal clk_1Hz : STD_LOGIC;
+    signal q_out   : STD_LOGIC_VECTOR (2 downto 0);
+    signal d_in    : STD_LOGIC_VECTOR (2 downto 0);
+
+begin
+
+    -- ==========================================
+    -- 1. สมการนับเฉพาะเลขคู่ (Even Counter)
+    -- ==========================================
+    d_in(0) <= '0';                 -- บิตแรกเป็น 0 เสมอเพื่อให้เป็นเลขคู่
+    d_in(1) <= not q_out(1);        -- บิตที่สองสลับค่า
+    d_in(2) <= q_out(2) xor q_out(1); -- บิตที่สามทำ XOR
+
+    -- 2. ตัวหารความถี่ 1 Hz
+    U_ClockDiv: Clock_Divider port map (clk_in => clk, reset => reset, clk_out => clk_1Hz);
+
+    -- 3. ต่อ D Flip-Flops
+    FF2: D_FF port map (D => d_in(2), CLK => clk_1Hz, RESET => reset, Q => q_out(2), Q_bar => open);
+    FF1: D_FF port map (D => d_in(1), CLK => clk_1Hz, RESET => reset, Q => q_out(1), Q_bar => open);
+    FF0: D_FF port map (D => d_in(0), CLK => clk_1Hz, RESET => reset, Q => q_out(0), Q_bar => open);
+
+    -- 4. แสดงผลเลขคู่ 0, 2, 4, 6 ออก 7-Segment
+    U_SegDecoder: sseg_decoder port map (bin => q_out, seg => seg, an => an);
+
+end Structural;
