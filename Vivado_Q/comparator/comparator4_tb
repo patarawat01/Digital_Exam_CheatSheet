@@ -1,0 +1,36 @@
+library IEEE;
+use IEEE.STD_LOGIC_1164.ALL;
+
+entity comparator4_tb is
+end;
+
+architecture sim of comparator4_tb is
+
+component comparator4
+Port(
+A : in STD_LOGIC_VECTOR(3 downto 0);
+B : in STD_LOGIC_VECTOR(3 downto 0);
+A_gt_B : out STD_LOGIC;
+A_eq_B : out STD_LOGIC;
+A_lt_B : out STD_LOGIC
+);
+end component;
+
+signal A,B : STD_LOGIC_VECTOR(3 downto 0);
+signal gt,eq,lt : STD_LOGIC;
+
+begin
+
+UUT: comparator4 port map(A,B,gt,eq,lt);
+
+process
+begin
+
+A <= "0011"; B <= "0011"; wait for 50 ns;
+A <= "0101"; B <= "0011"; wait for 50 ns;
+A <= "0001"; B <= "1000"; wait for 50 ns;
+
+wait;
+end process;
+
+end sim;
