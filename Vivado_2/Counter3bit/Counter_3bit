@@ -1,0 +1,64 @@
+library IEEE;
+use IEEE.STD_LOGIC_1164.ALL;
+
+entity Counter_3bit is
+    Port ( clk   : in  STD_LOGIC;   -- รับจาก W5 (100MHz)
+           reset : in  STD_LOGIC;   -- รับจากปุ่ม T17
+           LED   : out STD_LOGIC_VECTOR (2 downto 0)); -- ไปยัง LD10, LD11, LD12
+end Counter_3bit;
+
+architecture Structural of Counter_3bit is
+
+    component JK_FF
+        Port ( J, K, CLK, RESET : in STD_LOGIC; 
+               Q, Q_bar : out STD_LOGIC);
+    end component;
+
+    component Clock_Divider
+        Port ( clk_in, reset : in STD_LOGIC; 
+               clk_out : out STD_LOGIC);
+    end component;
+
+    signal clk_1Hz : STD_LOGIC;
+    signal q_out   : STD_LOGIC_VECTOR (2 downto 0);
+    signal j2_k2   : STD_LOGIC;
+
+begin
+
+    -- 1. เรียกใช้งาน Clock Divider
+    Div: Clock_Divider port map (
+        clk_in  => clk,
+        reset   => reset,
+        clk_out => clk_1Hz
+    );
+
+    -- 2. สมการลอจิกสำหรับขา J, K ของ Bit 2 (Structural mapping)
+    j2_k2 <= q_out(0) and q_out(1);
+
+    -- Bit 0 (LSB)
+    FF0: JK_FF port map (
+        J => '1', K => '1',
+        CLK => clk_1Hz, RESET => reset,
+        Q => q_out(0), Q_bar => open
+    );
+
+    -- Bit 1
+    FF1: JK_FF port map (
+        J => q_out(0), K => q_out(0),
+        CLK => clk_1Hz, RESET => reset,
+        Q => q_out(1), Q_bar => open
+    );
+
+    -- Bit 2 (MSB)
+    FF2: JK_FF port map (
+        J => j2_k2, K => j2_k2,
+        CLK => clk_1Hz, RESET => reset,
+        Q => q_out(2), Q_bar => open
+    );
+
+    -- 3. ส่งค่า Q ไปยัง LED ตามที่โจทย์กำหนด (LD12=MSB, LD10=LSB)
+    LED(0) <= q_out(0); -- LD10
+    LED(1) <= q_out(1); -- LD11
+    LED(2) <= q_out(2); -- LD12
+
+end Structural;
