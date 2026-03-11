@@ -1,0 +1,80 @@
+library IEEE;
+use IEEE.STD_LOGIC_1164.ALL;
+
+entity sseg_decoder is
+    Port ( bin      : in  STD_LOGIC_VECTOR (3 downto 0);
+           sseg_sel : in  STD_LOGIC_VECTOR (3 downto 0);
+           sseg     : out STD_LOGIC_VECTOR (6 downto 0);
+           sseg_en  : out STD_LOGIC_VECTOR (3 downto 0));
+end sseg_decoder;
+
+architecture Structural of sseg_decoder is
+
+    -- สร้าง Signal ไว้รับบิตแต่ละตำแหน่งให้เขียนสมการง่ายขึ้น
+    signal b3, b2, b1, b0 : STD_LOGIC;
+
+begin
+
+    -- แยกบิตจาก input bin (b3 = MSB, b0 = LSB)
+    b3 <= bin(3);
+    b2 <= bin(2);
+    b1 <= bin(1);
+    b0 <= bin(0);
+
+    -- ควบคุม Digit Select (Active Low)
+    sseg_en <= not sseg_sel;
+
+    -- =========================================================
+    -- ใช้สมการ Boolean (Assignment statements with Boolean expression)
+    -- ตามกฎข้อ 2.2.2 (Active Low: 1 = ไฟดับ, 0 = ไฟติด)
+    -- =========================================================
+
+    -- Segment A: sseg(0)
+    sseg(0) <= (not b3 and not b2 and not b1 and     b0) or 
+               (not b3 and     b2 and not b1 and not b0) or 
+               (    b3 and not b2 and     b1 and     b0) or 
+               (    b3 and     b2 and not b1 and     b0);   
+
+    -- Segment B: sseg(1)
+    sseg(1) <= (not b3 and     b2 and not b1 and     b0) or 
+               (not b3 and     b2 and     b1 and not b0) or 
+               (    b3 and not b2 and     b1 and     b0) or 
+               (    b3 and     b2 and not b1 and not b0) or 
+               (    b3 and     b2 and     b1 and not b0) or 
+               (    b3 and     b2 and     b1 and     b0);   
+
+    -- Segment C: sseg(2)
+    sseg(2) <= (not b3 and not b2 and     b1 and not b0) or 
+               (    b3 and     b2 and not b1 and not b0) or 
+               (    b3 and     b2 and     b1 and not b0) or 
+               (    b3 and     b2 and     b1 and     b0);   
+
+    -- Segment D: sseg(3)
+    sseg(3) <= (not b3 and not b2 and not b1 and     b0) or 
+               (not b3 and     b2 and not b1 and not b0) or 
+               (not b3 and     b2 and     b1 and     b0) or 
+               (    b3 and not b2 and     b1 and not b0) or 
+               (    b3 and     b2 and     b1 and     b0);   
+
+    -- Segment E: sseg(4)
+    sseg(4) <= (not b3 and not b2 and not b1 and     b0) or 
+               (not b3 and not b2 and     b1 and     b0) or 
+               (not b3 and     b2 and not b1 and not b0) or 
+               (not b3 and     b2 and not b1 and     b0) or 
+               (not b3 and     b2 and     b1 and     b0) or 
+               (    b3 and not b2 and not b1 and     b0);   
+
+    -- Segment F: sseg(5)
+    sseg(5) <= (not b3 and not b2 and not b1 and     b0) or 
+               (not b3 and not b2 and     b1 and not b0) or 
+               (not b3 and not b2 and     b1 and     b0) or 
+               (not b3 and     b2 and     b1 and     b0) or 
+               (    b3 and     b2 and not b1 and     b0);   
+
+    -- Segment G: sseg(6)
+    sseg(6) <= (not b3 and not b2 and not b1 and not b0) or 
+               (not b3 and not b2 and not b1 and     b0) or 
+               (not b3 and     b2 and     b1 and     b0) or 
+               (    b3 and     b2 and not b1 and not b0);   
+
+end Structural;
