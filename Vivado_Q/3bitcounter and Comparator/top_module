@@ -1,0 +1,30 @@
+library IEEE;
+use IEEE.STD_LOGIC_1164.ALL;
+
+entity counter_comp_top is
+    port (
+        clk       : in  std_logic; -- 100MHz Basys3 clock
+        reset     : in  std_logic; -- Button to reset counter
+        sw_input  : in  std_logic_vector(2 downto 0); -- 3 Switches
+        match_led : out std_logic  -- LED turns ON if equal
+    );
+end counter_comp_top;
+
+architecture Structural of counter_comp_top is
+    signal slow_clk : std_logic;
+    signal current_count : std_logic_vector(2 downto 0);
+begin
+
+    -- 1. Clock Divider to make the counter visible to humans
+    U_DIV: entity work.Clock_Divider 
+        port map(clk => clk, reset => reset, clk_out => slow_clk);
+
+    -- 2. The Structural Counter using our Universal JK FFs
+    U_CNT: entity work.counter3_jk 
+        port map(clk => slow_clk, reset => reset, Q => current_count);
+
+    -- 3. The Dataflow Comparator
+    U_COMP: entity work.comparator3 
+        port map(A => current_count, B => sw_input, equal => match_led);
+
+end Structural;
