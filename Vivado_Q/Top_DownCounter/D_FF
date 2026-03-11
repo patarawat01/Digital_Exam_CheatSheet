@@ -1,0 +1,34 @@
+library IEEE;
+use IEEE.STD_LOGIC_1164.ALL;
+
+entity D_FF is
+    Port ( D     : in  STD_LOGIC;
+           CLK   : in  STD_LOGIC;
+           RESET : in  STD_LOGIC;
+           Q     : out STD_LOGIC;
+           Q_bar : out STD_LOGIC);
+end D_FF;
+
+architecture Dataflow of D_FF is
+    signal reset_bar, clk_inv : STD_LOGIC;
+    signal m_s_nand, m_r_nand, m_q, m_q_bar : STD_LOGIC := '0';
+    signal s_s_nand, s_r_nand, s_q, s_q_bar : STD_LOGIC := '0';
+begin
+    reset_bar <= not RESET;
+    clk_inv   <= not CLK;
+
+    -- Master Latch
+    m_s_nand <= not (D and clk_inv and reset_bar);
+    m_r_nand <= not ((not D) and clk_inv);
+    m_q_bar  <= not (m_r_nand and m_q and reset_bar);
+    m_q      <= not (m_s_nand and m_q_bar);
+
+    -- Slave Latch
+    s_s_nand <= not (m_q and CLK and reset_bar);
+    s_r_nand <= not (m_q_bar and CLK);
+    s_q_bar  <= not (s_r_nand and s_q and reset_bar);
+    s_q      <= not (s_s_nand and s_q_bar);
+
+    Q     <= s_q;
+    Q_bar <= s_q_bar;
+end Dataflow;
