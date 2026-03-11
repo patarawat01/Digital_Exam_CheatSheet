@@ -1,0 +1,45 @@
+library IEEE;
+use IEEE.STD_LOGIC_1164.ALL;
+
+entity three_bit_adder is
+    Port ( A    : in  STD_LOGIC_VECTOR (2 downto 0);
+           B    : in  STD_LOGIC_VECTOR (2 downto 0);
+           Cin  : in  STD_LOGIC;
+           Sum  : out STD_LOGIC_VECTOR (2 downto 0);
+           Cout : out STD_LOGIC);
+end three_bit_adder;
+
+architecture Structural of three_bit_adder is
+
+    -- 1. ประกาศ Component ที่จะเอามาใช้ (ต้องชื่อตรงกับ Entity ของ Full Adder)
+    component full_adder_dataflow
+        Port ( A    : in  STD_LOGIC;
+               B    : in  STD_LOGIC;
+               Cin  : in  STD_LOGIC;
+               Sum  : out STD_LOGIC;
+               Cout : out STD_LOGIC);
+    end component;
+
+    -- 2. สร้างสายไฟจำลอง (Signal) เพื่อเชื่อมตัวทด (Carry) ระหว่างบิต
+    signal c1, c2 : STD_LOGIC;
+
+begin
+
+    -- 3. Port Mapping: เชื่อมต่อขาของ Full Adder แต่ละตัว (FA0, FA1, FA2)
+    
+    -- บิตที่ 0 (ขวาสุด) รับ Cin จากภายนอก และส่งตัวทดออกไปที่ c1
+    FA0: full_adder_dataflow port map (
+        A => A(0), B => B(0), Cin => Cin, Sum => Sum(0), Cout => c1
+    );
+
+    -- บิตที่ 1 รับตัวทด c1 เข้ามา และส่งตัวทดออกไปที่ c2
+    FA1: full_adder_dataflow port map (
+        A => A(1), B => B(1), Cin => c1, Sum => Sum(1), Cout => c2
+    );
+
+    -- บิตที่ 2 (ซ้ายสุด) รับตัวทด c2 เข้ามา และส่งตัวทดออกเป็น Cout ของวงจรทั้งหมด
+    FA2: full_adder_dataflow port map (
+        A => A(2), B => B(2), Cin => c2, Sum => Sum(2), Cout => Cout
+    );
+
+end Structural;
