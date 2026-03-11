@@ -1,0 +1,51 @@
+library IEEE;
+use IEEE.STD_LOGIC_1164.ALL;
+
+entity Combination1 is
+    Port ( D        : in  STD_LOGIC_VECTOR (7 downto 0);
+           sseg_sel : in  STD_LOGIC_VECTOR (3 downto 0);
+           sseg     : out STD_LOGIC_VECTOR (6 downto 0);
+           sseg_en  : out STD_LOGIC_VECTOR (3 downto 0));
+end Combination1;
+
+architecture Structural of Combination1 is
+
+    -- 1. Declare the Priority Encoder component (from Checkpoint 1)
+    component priority_encoder_8to3
+        Port ( D : in  STD_LOGIC_VECTOR (7 downto 0);
+               O : out STD_LOGIC_VECTOR (2 downto 0));
+    end component;
+
+    -- 2. Declare the 7-Segment Decoder component (from Lab Slides)
+    component sseg_decoder
+        Port ( bin      : in  STD_LOGIC_VECTOR (3 downto 0);
+               sseg_sel : in  STD_LOGIC_VECTOR (3 downto 0);
+               sseg     : out STD_LOGIC_VECTOR (6 downto 0);
+               sseg_en  : out STD_LOGIC_VECTOR (3 downto 0));
+    end component;
+
+    -- 3. Internal wires (signals) to connect the modules
+    signal enc_out  : STD_LOGIC_VECTOR (2 downto 0);
+    signal bin_4bit : STD_LOGIC_VECTOR (3 downto 0);
+
+begin
+
+    -- Pad the 3-bit encoder output with a leading zero to make it 4 bits
+    -- Example: if enc_out is "111" (7), bin_4bit becomes "0111" (7)
+    bin_4bit <= '0' & enc_out;
+
+    -- 4. Instantiate and map ports for the Priority Encoder
+    PE: priority_encoder_8to3 port map (
+        D => D,
+        O => enc_out
+    );
+
+    -- 5. Instantiate and map ports for the 7-Segment Decoder
+    SEG_DEC: sseg_decoder port map (
+        bin      => bin_4bit,
+        sseg_sel => sseg_sel,
+        sseg     => sseg,
+        sseg_en  => sseg_en
+    );
+
+end Structural;
