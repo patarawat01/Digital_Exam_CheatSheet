@@ -1,0 +1,26 @@
+library IEEE;
+use IEEE.STD_LOGIC_1164.ALL;
+
+entity priority_encoder_8to3 is
+    Port ( D : in  STD_LOGIC_VECTOR (7 downto 0);
+           O : out STD_LOGIC_VECTOR (2 downto 0));
+end priority_encoder_8to3;
+
+architecture dataflow of priority_encoder_8to3 is
+    -- The lab slides mention "Use signal as Temp", so we route the output through a temporary signal
+    signal Temp : STD_LOGIC_VECTOR (2 downto 0);
+begin
+    -- The when..else statement checks conditions sequentially, establishing priority.
+    Temp <= "111" when D(7) = '1' else
+            "110" when D(6) = '1' else
+            "101" when D(5) = '1' else
+            "100" when D(4) = '1' else
+            "011" when D(3) = '1' else
+            "010" when D(2) = '1' else
+            "001" when D(1) = '1' else
+            "000"; -- Default case when D(0) = '1' or no switch is pressed
+
+    -- Assign temp signal to actual output
+    O <= Temp;
+
+end dataflow;
