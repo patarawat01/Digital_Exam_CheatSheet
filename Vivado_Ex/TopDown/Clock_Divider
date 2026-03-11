@@ -1,0 +1,33 @@
+library IEEE;
+use IEEE.STD_LOGIC_1164.ALL;
+
+entity Clock_Divider is
+    Port ( clk_in  : in  STD_LOGIC;
+           reset   : in  STD_LOGIC;
+           clk_out : out STD_LOGIC);
+end Clock_Divider;
+
+architecture Structural of Clock_Divider is
+    component D_FF
+        Port ( D, CLK, RESET : in STD_LOGIC; Q, Q_bar : out STD_LOGIC);
+    end component;
+    
+    -- สายไฟ 27 เส้นเพื่อใช้หารความถี่
+    signal q_bar_temp : STD_LOGIC_VECTOR(26 downto 0);
+begin
+    -- ตัวที่ 0 รับ Clock จริงจากบอร์ด
+    FF0: D_FF port map (
+        D => q_bar_temp(0), CLK => clk_in, RESET => reset, 
+        Q => open, Q_bar => q_bar_temp(0)
+    );
+
+    -- ตัวที่ 1-26 ต่อเรียงกันเป็นทอดๆ
+    gen_div: for i in 1 to 26 generate
+        FFi: D_FF port map (
+            D => q_bar_temp(i), CLK => q_bar_temp(i-1), RESET => reset, 
+            Q => open, Q_bar => q_bar_temp(i)
+        );
+    end generate;
+
+    clk_out <= q_bar_temp(26);
+end Structural;
