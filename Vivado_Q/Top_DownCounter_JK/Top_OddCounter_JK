@@ -1,0 +1,49 @@
+library IEEE;
+use IEEE.STD_LOGIC_1164.ALL;
+
+entity Top_OddCounter_JK is
+    Port ( clk   : in  STD_LOGIC;
+           reset : in  STD_LOGIC;
+           seg   : out STD_LOGIC_VECTOR (6 downto 0);
+           an    : out STD_LOGIC_VECTOR (3 downto 0)
+         );
+end Top_OddCounter_JK;
+
+architecture Structural of Top_OddCounter_JK is
+
+    component JK_FF
+        Port ( J, K, CLK, RESET : in STD_LOGIC; Q : out STD_LOGIC);
+    end component;
+
+    component Clock_Divider
+        Port ( clk_in, reset : in STD_LOGIC; clk_out : out STD_LOGIC);
+    end component;
+
+    component sseg_decoder
+        Port ( bin : in STD_LOGIC_VECTOR(2 downto 0); 
+               seg : out STD_LOGIC_VECTOR(6 downto 0); 
+               an : out STD_LOGIC_VECTOR(3 downto 0));
+    end component;
+
+    signal clk_1Hz : STD_LOGIC;
+    signal q_out   : STD_LOGIC_VECTOR (2 downto 0);
+
+begin
+
+    -- 1. ตัวหารความถี่เหลือ 1 Hz
+    U_ClockDiv: Clock_Divider port map (clk_in => clk, reset => reset, clk_out => clk_1Hz);
+
+    -- 2. ต่อ JK Flip-Flops ตามสมการเลขคี่
+    -- Bit 0: J=1, K=0 (บังคับให้เป็น 1 เสมอเพื่อให้เป็นเลขคี่)
+    FF0: JK_FF port map (J => '1', K => '0', CLK => clk_1Hz, RESET => reset, Q => q_out(0));
+    
+    -- Bit 1: J=1, K=1 (Toggle ทุกครั้งที่ Clock มา)
+    FF1: JK_FF port map (J => '1', K => '1', CLK => clk_1Hz, RESET => reset, Q => q_out(1));
+    
+    -- Bit 2: J=Q1, K=Q1 (Toggle ตามค่า Q1)
+    FF2: JK_FF port map (J => q_out(1), K => q_out(1), CLK => clk_1Hz, RESET => reset, Q => q_out(2));
+
+    -- 3. แสดงผลออกจอ 7-Segment (จะโชว์เฉพาะ 1, 3, 5, 7)
+    U_SegDecoder: sseg_decoder port map (bin => q_out, seg => seg, an => an);
+
+end Structural;
