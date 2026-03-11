@@ -1,0 +1,30 @@
+library IEEE;
+use IEEE.STD_LOGIC_1164.ALL;
+use IEEE.STD_LOGIC_UNSIGNED.ALL;
+
+entity up_down_counter is
+    port (
+        clk   : in  std_logic;
+        reset : in  std_logic;
+        up    : in  std_logic; -- 1 for up, 0 for down
+        Q     : out std_logic_vector(2 downto 0)
+    );
+end up_down_counter;
+
+architecture Structural of up_down_counter is
+    signal count_reg : std_logic_vector(2 downto 0) := "000";
+begin
+    process(clk, reset)
+    begin
+        if reset = '1' then
+            count_reg <= "000";
+        elsif rising_edge(clk) then
+            if up = '1' then
+                count_reg <= count_reg + 1;
+            else
+                count_reg <= count_reg - 1;
+            end if;
+        end if;
+    end process;
+    Q <= count_reg;
+end Structural;
