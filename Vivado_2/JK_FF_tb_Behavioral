@@ -1,0 +1,71 @@
+library IEEE;
+use IEEE.STD_LOGIC_1164.ALL;
+
+entity JK_FF_behavioral_tb is
+end JK_FF_behavioral_tb;
+
+architecture Behavioral of JK_FF_behavioral_tb is
+
+    component JK_FF_behavioral
+        Port (
+            J   : in  STD_LOGIC;
+            K   : in  STD_LOGIC;
+            CLK : in  STD_LOGIC;
+            Q   : out STD_LOGIC;
+            Qn  : out STD_LOGIC
+        );
+    end component;
+
+    signal J   : STD_LOGIC := '0';
+    signal K   : STD_LOGIC := '0';
+    signal CLK : STD_LOGIC := '0';
+    signal Q   : STD_LOGIC;
+    signal Qn  : STD_LOGIC;
+
+begin
+
+    uut: JK_FF_behavioral
+        port map (
+            J   => J,
+            K   => K,
+            CLK => CLK,
+            Q   => Q,
+            Qn  => Qn
+        );
+
+    clk_process : process
+    begin
+        while true loop
+            CLK <= '0';
+            wait for 5 ns;
+            CLK <= '1';
+            wait for 5 ns;
+        end loop;
+    end process;
+
+    stim_process : process
+    begin
+        -- hold
+        J <= '0'; K <= '0';
+        wait for 20 ns;
+
+        -- set
+        J <= '1'; K <= '0';
+        wait for 20 ns;
+
+        -- reset
+        J <= '0'; K <= '1';
+        wait for 20 ns;
+
+        -- toggle
+        J <= '1'; K <= '1';
+        wait for 20 ns;
+
+        -- hold
+        J <= '0'; K <= '0';
+        wait for 20 ns;
+
+        wait;
+    end process;
+
+end Behavioral;
