@@ -1,0 +1,62 @@
+library IEEE;
+use IEEE.STD_LOGIC_1164.ALL;
+
+entity tb_JK_FF is
+-- ไม่มี Port
+end tb_JK_FF;
+
+architecture Behavioral of tb_JK_FF is
+
+    component JK_FF
+        Port ( J, K, CLK, RESET : in STD_LOGIC;
+               Q, Q_bar : out STD_LOGIC);
+    end component;
+
+    signal J_tb, K_tb, CLK_tb, RESET_tb : STD_LOGIC := '0';
+    signal Q_tb, Q_bar_tb : STD_LOGIC;
+
+    constant CLK_PERIOD : time := 20 ns;
+
+begin
+
+    uut: JK_FF port map (
+        J => J_tb, K => K_tb, CLK => CLK_tb, RESET => RESET_tb,
+        Q => Q_tb, Q_bar => Q_bar_tb
+    );
+
+    -- สร้างสัญญาณ Clock
+    clk_process : process
+    begin
+        CLK_tb <= '0'; wait for CLK_PERIOD/2;
+        CLK_tb <= '1'; wait for CLK_PERIOD/2;
+    end process;
+
+    -- ป้อนสถานะต่างๆ ของ JK Flip-Flop
+    stim_proc: process
+    begin
+        -- เริ่มต้นด้วยการกด Reset เพื่อเคลียร์ค่าเป็น 0
+        RESET_tb <= '1';
+        wait for 20 ns;
+        RESET_tb <= '0';
+        wait for 20 ns;
+
+        -- 1. ทดสอบ No Change (J=0, K=0) -> Q ต้องเป็น 0 เหมือนเดิม
+        J_tb <= '0'; K_tb <= '0';
+        wait for 40 ns;
+ 
+        -- 2. ทดสอบ Set (J=1, K=0) -> Q ต้องเปลี่ยนเป็น 1
+        J_tb <= '1'; K_tb <= '0';
+        wait for 40 ns;
+
+        -- 3. ทดสอบ Reset (J=0, K=1) -> Q ต้องเปลี่ยนกลับเป็น 0
+        J_tb <= '0'; K_tb <= '1';
+        wait for 40 ns;
+
+        -- 4. ทดสอบ Toggle (J=1, K=1) -> Q ต้องสลับค่าไปมา (0->1->0->1) ทุกขอบขาขึ้น
+        J_tb <= '1'; K_tb <= '1';
+        wait for 100 ns;
+
+        wait;
+    end process;
+
+end Behavioral;
