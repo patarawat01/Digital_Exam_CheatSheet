@@ -1,0 +1,24 @@
+library IEEE;
+use IEEE.STD_LOGIC_1164.ALL;
+
+entity JK_FF is
+    Port ( J, K, CLK, RESET : in STD_LOGIC;
+           Q : out STD_LOGIC);
+end JK_FF;
+
+architecture Dataflow of JK_FF is
+    signal q_reg, q_next : STD_LOGIC := '0';
+begin
+    -- สมการ JK Flip-Flop: Q_next = JQ' + K'Q
+    q_next <= (J and (not q_reg)) or ((not K) and q_reg);
+
+    process(CLK, RESET)
+    begin
+        if (RESET = '1') then
+            q_reg <= '0';
+        elsif (rising_edge(CLK)) then
+            q_reg <= q_next;
+        end if;
+    end process;
+    Q <= q_reg;
+end Dataflow;
