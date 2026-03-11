@@ -1,0 +1,55 @@
+library IEEE;
+use IEEE.STD_LOGIC_1164.ALL;
+
+entity five_bit_adder is
+    Port ( A    : in  STD_LOGIC_VECTOR (4 downto 0);
+           B    : in  STD_LOGIC_VECTOR (4 downto 0);
+           Cin  : in  STD_LOGIC;
+           Sum  : out STD_LOGIC_VECTOR (4 downto 0);
+           Cout : out STD_LOGIC);
+end five_bit_adder;
+
+architecture Structural of five_bit_adder is
+
+    -- 1. ประกาศ Component ของ Full Adder แบบ Dataflow
+    component full_adder_dataflow
+        Port ( A    : in  STD_LOGIC;
+               B    : in  STD_LOGIC;
+               Cin  : in  STD_LOGIC;
+               Sum  : out STD_LOGIC;
+               Cout : out STD_LOGIC);
+    end component;
+
+    -- 2. สร้างสายไฟ (Signal) สำหรับเชื่อมตัวทด (Carry) ภายในวงจรทั้ง 4 เส้น
+    signal c1, c2, c3, c4 : STD_LOGIC;
+
+begin
+
+    -- 3. Port Mapping: เชื่อมต่อขาของ Full Adder ทั้ง 5 ตัว
+    
+    -- บิตที่ 0 (LSB - ขวาสุด)
+    FA0: full_adder_dataflow port map (
+        A => A(0), B => B(0), Cin => Cin, Sum => Sum(0), Cout => c1
+    );
+
+    -- บิตที่ 1
+    FA1: full_adder_dataflow port map (
+        A => A(1), B => B(1), Cin => c1, Sum => Sum(1), Cout => c2
+    );
+
+    -- บิตที่ 2
+    FA2: full_adder_dataflow port map (
+        A => A(2), B => B(2), Cin => c2, Sum => Sum(2), Cout => c3
+    );
+
+    -- บิตที่ 3
+    FA3: full_adder_dataflow port map (
+        A => A(3), B => B(3), Cin => c3, Sum => Sum(3), Cout => c4
+    );
+
+    -- บิตที่ 4 (MSB - ซ้ายสุด) ส่งตัวทดตัวสุดท้ายออกเป็น Cout ของวงจรหลัก
+    FA4: full_adder_dataflow port map (
+        A => A(4), B => B(4), Cin => c4, Sum => Sum(4), Cout => Cout
+    );
+
+end Structural;
