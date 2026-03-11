@@ -1,0 +1,58 @@
+library IEEE;
+use IEEE.STD_LOGIC_1164.ALL;
+
+entity Top_OddEvenCounter is
+    Port ( clk   : in  STD_LOGIC;
+           reset : in  STD_LOGIC;
+           M     : in  STD_LOGIC;   -- สวิตช์เลือกโหมด (เพิ่มเข้ามาใหม่!)
+           seg   : out STD_LOGIC_VECTOR (6 downto 0);
+           an    : out STD_LOGIC_VECTOR (3 downto 0)
+         );
+end Top_OddEvenCounter;
+
+architecture Structural of Top_OddEvenCounter is
+
+    -- 1. ประกาศ Components 
+    component D_FF
+        Port ( D, CLK, RESET : in STD_LOGIC; Q, Q_bar : out STD_LOGIC);
+    end component;
+
+    component Clock_Divider
+        Port ( clk_in, reset : in STD_LOGIC; clk_out : out STD_LOGIC);
+    end component;
+
+    component sseg_decoder
+        Port ( bin : in STD_LOGIC_VECTOR(2 downto 0); 
+               seg : out STD_LOGIC_VECTOR(6 downto 0); 
+               an : out STD_LOGIC_VECTOR(3 downto 0));
+    end component;
+
+    signal clk_1Hz : STD_LOGIC;
+    signal q_out   : STD_LOGIC_VECTOR (2 downto 0);
+    signal d_in    : STD_LOGIC_VECTOR (2 downto 0);
+
+begin
+
+    -- ==========================================
+    -- 2. สมการ Dataflow (จาก K-Map ด้านบน)
+    -- ==========================================
+    d_in(0) <= M;
+    d_in(1) <= not q_out(1);
+    d_in(2) <= q_out(2) xor q_out(1);
+
+    -- ==========================================
+    -- 3. ประกอบร่าง (Structural Port Mapping)
+    -- ==========================================
+    U_ClockDiv: Clock_Divider port map (
+        clk_in  => clk, reset => reset, clk_out => clk_1Hz
+    );
+
+    FF2: D_FF port map (D => d_in(2), CLK => clk_1Hz, RESET => reset, Q => q_out(2), Q_bar => open);
+    FF1: D_FF port map (D => d_in(1), CLK => clk_1Hz, RESET => reset, Q => q_out(1), Q_bar => open);
+    FF0: D_FF port map (D => d_in(0), CLK => clk_1Hz, RESET => reset, Q => q_out(0), Q_bar => open);
+
+    U_SegDecoder: sseg_decoder port map (
+        bin => q_out, seg => seg, an  => an
+    );
+
+end Structural;
