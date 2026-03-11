@@ -1,0 +1,37 @@
+library IEEE;
+use IEEE.STD_LOGIC_1164.ALL;
+
+entity tb_two_bit_adder is
+end tb_two_bit_adder;
+
+architecture Behavioral of tb_two_bit_adder is
+    component two_bit_adder
+        Port ( A : in STD_LOGIC_VECTOR (1 downto 0);
+               B : in STD_LOGIC_VECTOR (1 downto 0);
+               Sum : out STD_LOGIC_VECTOR (1 downto 0);
+               Cout : out STD_LOGIC);
+    end component;
+
+    signal A_tb, B_tb, Sum_tb : STD_LOGIC_VECTOR (1 downto 0);
+    signal Cout_tb : STD_LOGIC;
+
+begin
+    uut: two_bit_adder port map (A => A_tb, B => B_tb, Sum => Sum_tb, Cout => Cout_tb);
+
+    stim_proc: process
+    begin
+        -- Test Case 1: 00 + 01 = 01 (0+1=1)
+        A_tb <= "00"; B_tb <= "01"; wait for 10 ns;
+        
+        -- Test Case 2: 01 + 01 = 10 (1+1=2)
+        A_tb <= "01"; B_tb <= "01"; wait for 10 ns;
+        
+        -- Test Case 3: 10 + 11 = 101 (2+3=5 -> Cout=1, Sum=01)
+        A_tb <= "10"; B_tb <= "11"; wait for 10 ns;
+        
+        -- Test Case 4: 11 + 11 = 110 (3+3=6 -> Cout=1, Sum=10)
+        A_tb <= "11"; B_tb <= "11"; wait for 10 ns;
+        
+        wait;
+    end process;
+end Behavioral;
