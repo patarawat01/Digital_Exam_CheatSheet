@@ -1,0 +1,47 @@
+library IEEE;
+use IEEE.STD_LOGIC_1164.ALL;
+
+entity tb_three_bit_adder is
+-- Testbench ไม่มี Port
+end tb_three_bit_adder;
+
+architecture Behavioral of tb_three_bit_adder is
+
+    component three_bit_adder
+        Port ( A    : in  STD_LOGIC_VECTOR (2 downto 0);
+               B    : in  STD_LOGIC_VECTOR (2 downto 0);
+               Cin  : in  STD_LOGIC;
+               Sum  : out STD_LOGIC_VECTOR (2 downto 0);
+               Cout : out STD_LOGIC);
+    end component;
+
+    -- Signals สำหรับเชื่อมต่อ
+    signal A_tb, B_tb   : STD_LOGIC_VECTOR (2 downto 0) := "000";
+    signal Cin_tb       : STD_LOGIC := '0';
+    signal Sum_tb       : STD_LOGIC_VECTOR (2 downto 0);
+    signal Cout_tb      : STD_LOGIC;
+
+begin
+
+    uut: three_bit_adder port map (
+        A => A_tb, B => B_tb, Cin => Cin_tb, Sum => Sum_tb, Cout => Cout_tb
+    );
+
+    stim_proc: process
+    begin
+        -- กรณีที่ 1: 001 + 010 + 0 = 011 (1 + 2 = 3)
+        A_tb <= "001"; B_tb <= "010"; Cin_tb <= '0'; wait for 10 ns;
+        
+        -- กรณีที่ 2: 011 + 010 + 0 = 101 (3 + 2 = 5)
+        A_tb <= "011"; B_tb <= "010"; Cin_tb <= '0'; wait for 10 ns;
+        
+        -- กรณีที่ 3: 111 + 001 + 0 = 000 และ Cout=1 (7 + 1 = 8 ซึ่งเกิน 3 บิต)
+        A_tb <= "111"; B_tb <= "001"; Cin_tb <= '0'; wait for 10 ns;
+        
+        -- กรณีที่ 4: 111 + 111 + 1 = 111 และ Cout=1 (7 + 7 + 1 = 15 -> เลขฐานสอง 1111)
+        A_tb <= "111"; B_tb <= "111"; Cin_tb <= '1'; wait for 10 ns;
+
+        wait;
+    end process;
+
+end Behavioral;
