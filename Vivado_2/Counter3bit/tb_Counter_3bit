@@ -1,0 +1,51 @@
+library IEEE;
+use IEEE.STD_LOGIC_1164.ALL;
+
+entity tb_Counter_3bit is
+-- ไม่มี Port
+end tb_Counter_3bit;
+
+architecture Behavioral of tb_Counter_3bit is
+
+    component Counter_3bit
+        Port ( clk   : in  STD_LOGIC;
+               reset : in  STD_LOGIC;
+               LED   : out STD_LOGIC_VECTOR (2 downto 0));
+    end component;
+
+    signal clk_tb   : STD_LOGIC := '0';
+    signal reset_tb : STD_LOGIC := '0';
+    signal LED_tb   : STD_LOGIC_VECTOR (2 downto 0);
+
+    constant CLK_PERIOD : time := 10 ns; -- เท่ากับ Clock 100MHz ของบอร์ดจริง
+
+begin
+
+    uut: Counter_3bit port map (
+        clk   => clk_tb,
+        reset => reset_tb,
+        LED   => LED_tb
+    );
+
+    -- สร้างสัญญาณนาฬิกา 100 MHz
+    clk_process : process
+    begin
+        clk_tb <= '0'; wait for CLK_PERIOD/2;
+        clk_tb <= '1'; wait for CLK_PERIOD/2;
+    end process;
+
+    -- ป้อนข้อมูลจำลอง
+    stim_proc: process
+    begin
+        -- กดปุ่ม Reset ค้างไว้แป๊บนึง เพื่อให้มั่นใจว่าเริ่มนับที่ 000
+        reset_tb <= '1';
+        wait for 50 ns;
+        reset_tb <= '0';
+        
+        -- จากนี้ปล่อยให้วงจรนับไปเรื่อยๆ ตาม Clock
+        -- (ใช้เวลาในการจำลองนานแค่ไหน ขึ้นอยู่กับว่าคุณปรับ Clock_Divider ไว้เท่าไหร่)
+        
+        wait;
+    end process;
+
+end Behavioral;
