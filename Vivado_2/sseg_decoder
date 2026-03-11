@@ -1,0 +1,40 @@
+library IEEE;
+use IEEE.STD_LOGIC_1164.ALL;
+
+entity sseg_decoder is
+    Port ( bin      : in  STD_LOGIC_VECTOR (3 downto 0);
+           sseg_sel : in  STD_LOGIC_VECTOR (3 downto 0);
+           sseg     : out STD_LOGIC_VECTOR (6 downto 0);
+           sseg_en  : out STD_LOGIC_VECTOR (3 downto 0));
+end sseg_decoder;
+
+architecture Dataflow of sseg_decoder is
+begin
+
+    -- ควบคุม Digit Select ให้เป็น Active Low
+    sseg_en <= not sseg_sel;
+
+    -- =========================================================
+    -- ใช้ Dataflow Style (Concurrent Assignment ด้วย when...else)
+    -- ทำงานแบบขนาน ไม่มี process() ตรงตามกฎข้อ 2.2.1
+    -- (Active Low: 0 = ไฟติด, 1 = ไฟดับ เรียงบิต G F E D C B A)
+    -- =========================================================
+    sseg <= "1000000" when bin = "0000" else -- เลข 0
+            "1111001" when bin = "0001" else -- เลข 1
+            "0100100" when bin = "0010" else -- เลข 2
+            "0110000" when bin = "0011" else -- เลข 3
+            "0011001" when bin = "0100" else -- เลข 4
+            "0010010" when bin = "0101" else -- เลข 5
+            "0000010" when bin = "0110" else -- เลข 6
+            "1111000" when bin = "0111" else -- เลข 7
+            "0000000" when bin = "1000" else -- เลข 8
+            "0010000" when bin = "1001" else -- เลข 9
+            "0001000" when bin = "1010" else -- ตัวอักษร A
+            "0000011" when bin = "1011" else -- ตัวอักษร b
+            "1000110" when bin = "1100" else -- ตัวอักษร C
+            "0100001" when bin = "1101" else -- ตัวอักษร d
+            "0000110" when bin = "1110" else -- ตัวอักษร E
+            "0001110" when bin = "1111" else -- ตัวอักษร F
+            "1111111";                       -- ปิดไฟทุกดวง (Blank)
+
+end Dataflow;
