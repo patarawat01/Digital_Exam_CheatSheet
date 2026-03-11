@@ -1,0 +1,54 @@
+library IEEE;
+use IEEE.STD_LOGIC_1164.ALL;
+
+entity tb_priority_encoder is
+-- Testbench has no ports
+end tb_priority_encoder;
+
+architecture Behavioral of tb_priority_encoder is
+
+    -- Component Declaration
+    component priority_encoder_8to3
+        Port ( D : in  STD_LOGIC_VECTOR (7 downto 0);
+               O : out STD_LOGIC_VECTOR (2 downto 0));
+    end component;
+
+    -- Signals to connect to the UUT
+    signal D_tb : STD_LOGIC_VECTOR (7 downto 0) := "00000000";
+    signal O_tb : STD_LOGIC_VECTOR (2 downto 0);
+
+begin
+
+    -- Instantiate the Unit Under Test (UUT)
+    uut: priority_encoder_8to3 port map (
+        D => D_tb,
+        O => O_tb
+    );
+
+    -- Stimulus process
+    stim_proc: process
+    begin
+        -- PART 1: 8 input cases for each input switch (Single bit active)
+        D_tb <= "00000001"; wait for 50 ns; -- D(0) active -> Output: 000
+        D_tb <= "00000010"; wait for 50 ns; -- D(1) active -> Output: 001
+        D_tb <= "00000100"; wait for 50 ns; -- D(2) active -> Output: 010
+        D_tb <= "00001000"; wait for 50 ns; -- D(3) active -> Output: 011
+        D_tb <= "00010000"; wait for 50 ns; -- D(4) active -> Output: 100
+        D_tb <= "00100000"; wait for 50 ns; -- D(5) active -> Output: 101
+        D_tb <= "01000000"; wait for 50 ns; -- D(6) active -> Output: 110
+        D_tb <= "10000000"; wait for 50 ns; -- D(7) active -> Output: 111
+
+        -- PART 2: 3 input cases with at least 2 activated input switches
+        -- Case 9: D(3) and D(1) active. D(3) has priority.
+        D_tb <= "00001010"; wait for 50 ns; -- Expected Output: 011
+        
+        -- Case 10: D(6), D(5), and D(0) active. D(6) has priority.
+        D_tb <= "01100001"; wait for 50 ns; -- Expected Output: 110
+        
+        -- Case 11: D(7) and D(2) active. D(7) has priority.
+        D_tb <= "10000100"; wait for 50 ns; -- Expected Output: 111
+
+        wait; -- Suspend simulation
+    end process;
+
+end Behavioral;
