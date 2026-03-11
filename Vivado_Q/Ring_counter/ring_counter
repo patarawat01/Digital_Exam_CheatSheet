@@ -1,0 +1,68 @@
+library IEEE;
+use IEEE.STD_LOGIC_1164.ALL;
+
+entity ring_counter is
+    port (
+        clk   : in  std_logic; -- 100MHz Basys3 Clock (Pin W5)
+        reset : in  std_logic; -- Button to start/reset the ring
+        Q_out : out std_logic_vector(2 downto 0) -- 3 LEDs
+    );
+end ring_counter;
+
+architecture Structural of ring_counter is
+    -- Internal signals to connect components
+    signal slow_clk : std_logic;
+    signal q_int    : std_logic_vector(2 downto 0);
+begin
+
+    -- 1. Instantiate Clock Divider (Slowing 100MHz to ~1.5Hz)
+    U_DIV: entity work.Clock_Divider 
+        port map(
+            clk     => clk, 
+            reset   => reset, 
+            clk_out => slow_clk
+        );
+
+    -- 2. Flip-Flop 0: The "Start" bit
+    -- Notice: When reset is pressed, this FF uses PRESET to start at '1'
+    FF0: entity work.JK_FF 
+        port map(
+            J      => q_int(2),     -- Feedback from last bit
+            K      => not q_int(2), 
+            clk    => slow_clk, 
+            reset  => '0',          -- No reset here
+            preset => reset,        -- Starts at '1'
+            Q      => q_int(0),
+            Q_bar  => open
+        );
+
+    -- 3. Flip-Flop 1
+    -- Notice: When reset is pressed, this FF uses RESET to start at '0'
+    FF1: entity work.JK_FF 
+        port map(
+            J      => q_int(0), 
+            K      => not q_int(0), 
+            clk    => slow_clk, 
+            reset  => reset,        -- Starts at '0'
+            preset => '0', 
+            Q      => q_int(1),
+            Q_bar  => open
+        );
+
+    -- 4. Flip-Flop 2
+    -- Notice: When reset is pressed, this FF uses RESET to start at '0'
+    FF2: entity work.JK_FF 
+        port map(
+            J      => q_int(1), 
+            K      => not q_int(1), 
+            clk    => slow_clk, 
+            reset  => reset,        -- Starts at '0'
+            preset => '0', 
+            Q      => q_int(2),
+            Q_bar  => open
+        );
+
+    -- Output to LEDs
+    Q_out <= q_int;
+
+end Structural;
