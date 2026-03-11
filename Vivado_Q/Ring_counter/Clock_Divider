@@ -1,0 +1,28 @@
+library IEEE;
+use IEEE.STD_LOGIC_1164.ALL;
+use IEEE.STD_LOGIC_UNSIGNED.ALL;
+
+entity Clock_Divider is
+    port (
+        clk     : in  std_logic; -- 100MHz from Basys3 (Pin W5)
+        reset   : in  std_logic; 
+        clk_out : out std_logic  -- The "Slow Clock"
+    );
+end Clock_Divider;
+
+architecture Structural of Clock_Divider is
+    -- 26-bit register: 2^26 = 67,108,864
+    signal count : std_logic_vector(25 downto 0) := (others => '0');
+begin
+    process(clk, reset)
+    begin
+        if reset = '1' then
+            count <= (others => '0');
+        elsif rising_edge(clk) then
+            count <= count + 1;
+        end if;
+    end process;
+    
+    -- We use the highest bit to drive our LEDs/Counters
+    clk_out <= count(25); 
+end Structural;
