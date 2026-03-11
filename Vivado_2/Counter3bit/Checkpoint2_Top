@@ -1,0 +1,46 @@
+library IEEE;
+use IEEE.STD_LOGIC_1164.ALL;
+
+entity Checkpoint2_Top is
+    Port ( clk   : in  STD_LOGIC;
+           reset : in  STD_LOGIC;
+           seg   : out STD_LOGIC_VECTOR (6 downto 0);
+           an    : out STD_LOGIC_VECTOR (3 downto 0));
+end Checkpoint2_Top;
+
+architecture Structural of Checkpoint2_Top is
+
+    -- 1. ดึง Component ของ Counter จาก Checkpoint 1
+    component Counter_3bit
+        Port ( clk   : in  STD_LOGIC;
+               reset : in  STD_LOGIC;
+               LED   : out STD_LOGIC_VECTOR (2 downto 0));
+    end component;
+
+    -- 2. ดึง Component ของ Decoder 
+    component sseg_decoder
+        Port ( bin : in  STD_LOGIC_VECTOR (2 downto 0);
+               seg : out STD_LOGIC_VECTOR (6 downto 0);
+               an  : out STD_LOGIC_VECTOR (3 downto 0));
+    end component;
+
+    -- สายไฟจำลอง (Wire) สำหรับเอาต์พุตจาก Counter ไปเข้า Decoder
+    signal count_val : STD_LOGIC_VECTOR (2 downto 0);
+
+begin
+
+    -- 3. ต่อสายวงจรนับ (Counter)
+    U1_Counter: Counter_3bit port map (
+        clk   => clk,
+        reset => reset,
+        LED   => count_val  -- โยนค่าที่นับได้เข้าสายไฟ count_val
+    );
+
+    -- 4. ต่อสายวงจรถอดรหัสจอ (Decoder)
+    U2_Decoder: sseg_decoder port map (
+        bin => count_val,   -- รับค่าจากสายไฟ count_val
+        seg => seg,         -- ส่งออกขา seg
+        an  => an           -- ส่งออกขา an
+    );
+
+end Structural;
