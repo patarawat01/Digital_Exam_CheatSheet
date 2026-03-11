@@ -1,0 +1,61 @@
+library IEEE;
+use IEEE.STD_LOGIC_1164.ALL;
+
+entity tb_counter_comp_system is
+end tb_counter_comp_system;
+
+architecture Behavioral of tb_counter_comp_system is
+    -- 1. Create local signals to connect to the Top Module
+    signal clk_tb       : std_logic := '0';
+    signal reset_tb     : std_logic := '0';
+    signal sw_input_tb  : std_logic_vector(2 downto 0) := "011"; -- We set switches to '3'
+    signal match_led_tb : std_logic;
+
+    -- 2. Define the clock period (100MHz = 10ns)
+    constant clk_period : time := 10 ns;
+begin
+
+    -- 3. Instantiate the Top Module (The Unit Under Test)
+    UUT: entity work.counter_comp_top
+        port map (
+            clk       => clk_tb,
+            reset     => reset_tb,
+            sw_input  => sw_input_tb,
+            match_led => match_led_tb
+        );
+
+    -- 4. Generate the 100MHz clock signal
+    clk_process : process
+    begin
+        clk_tb <= '0';
+        wait for clk_period/2;
+        clk_tb <= '1';
+        wait for clk_period/2;
+    end process;
+
+    -- 5. The Test Scenario
+    stim_proc: process
+    begin		
+        -- Start by resetting everything
+        reset_tb <= '1';
+        wait for 50 ns;	
+        reset_tb <= '0'; 
+
+        -- NOTE: Because of the Clock_Divider, the counter only 
+        -- increments every few milliseconds in real life.
+        -- In simulation, look at the 'slow_clk' signal inside the UUT.
+        
+        -- Scenario A: Switches are at "011" (3). 
+        -- When the counter hits 3, match_led_tb should go HIGH.
+        wait for 1 ms; 
+
+        -- Scenario B: Change switches to "110" (6).
+        -- match_led_tb should go LOW immediately and only go HIGH 
+        -- when the counter eventually reaches 6.
+        sw_input_tb <= "110";
+        wait for 1 ms;
+
+        wait; -- End simulation
+    end process;
+
+end Behavioral;
