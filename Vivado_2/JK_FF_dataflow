@@ -1,0 +1,28 @@
+library IEEE;
+use IEEE.STD_LOGIC_1164.ALL;
+
+entity JK_FF_dataflow is
+    Port (
+        CLK  : in  STD_LOGIC;
+        J    : in  STD_LOGIC;
+        K    : in  STD_LOGIC;
+        Q    : out STD_LOGIC;
+        QBAR : out STD_LOGIC
+    );
+end JK_FF_dataflow;
+
+architecture Dataflow of JK_FF_dataflow is
+    signal qi   : STD_LOGIC := '0';
+    signal qbi  : STD_LOGIC := '1';
+    signal s1   : STD_LOGIC;
+    signal s2   : STD_LOGIC;
+begin
+    s1 <= not (J and CLK and qbi);
+    s2 <= not (K and CLK and qi);
+
+    qi  <= s1 nand qbi;
+    qbi <= s2 nand qi;
+
+    Q    <= qi;
+    QBAR <= qbi;
+end Dataflow;
