@@ -1,0 +1,22 @@
+library IEEE;
+use IEEE.STD_LOGIC_1164.ALL;
+
+entity two_bit_adder is
+    Port ( A    : in  STD_LOGIC_VECTOR (1 downto 0);
+           B    : in  STD_LOGIC_VECTOR (1 downto 0);
+           Sum  : out STD_LOGIC_VECTOR (1 downto 0);
+           Cout : out STD_LOGIC);
+end two_bit_adder;
+
+architecture dataflow of two_bit_adder is
+    signal c1 : STD_LOGIC; -- สัญญาณตัวทดภายในระหว่างบิตที่ 0 ไป 1
+begin
+    -- บิตที่ 0: Half Adder logic
+    Sum(0) <= A(0) xor B(0);
+    c1     <= A(0) and B(0);
+
+    -- บิตที่ 1: Full Adder logic (บวก A, B และตัวทด c1)
+    Sum(1) <= A(1) xor B(1) xor c1;
+    Cout   <= (A(1) and B(1)) or (c1 and (A(1) xor B(1)));
+    
+end dataflow;
