@@ -1,0 +1,18 @@
+library IEEE;
+use IEEE.STD_LOGIC_1164.ALL;
+
+entity decoder_2to4 is
+    port (
+        sel : in  std_logic_vector(1 downto 0);
+        en  : in  std_logic;
+        y   : out std_logic_vector(3 downto 0)
+    );
+end decoder_2to4;
+
+architecture Dataflow of decoder_2to4 is
+begin
+    y(0) <= en and (not sel(1)) and (not sel(0));
+    y(1) <= en and (not sel(1)) and (sel(0));
+    y(2) <= en and (sel(1)) and (not sel(0));
+    y(3) <= en and (sel(1)) and (sel(0));
+end Dataflow;
