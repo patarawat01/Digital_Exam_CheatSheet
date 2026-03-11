@@ -1,0 +1,42 @@
+library IEEE;
+use IEEE.STD_LOGIC_1164.ALL;
+
+entity Clock_Divider is
+    Port ( clk_in  : in  STD_LOGIC;
+           reset   : in  STD_LOGIC;
+           clk_out : out STD_LOGIC);
+end Clock_Divider;
+
+architecture Structural of Clock_Divider is
+
+    component JK_FF
+        Port ( J, K, CLK, RESET : in STD_LOGIC; 
+               Q, Q_bar : out STD_LOGIC);
+    end component;
+
+    -- สายไฟเชื่อมแต่ละ Stage (0 ถึง 26)
+    signal q_bar_temp : STD_LOGIC_VECTOR(26 downto 0);
+
+begin
+
+    -- Stage ที่ 0: รับ Clock ตรงๆ จากบอร์ด
+    FF0: JK_FF port map (
+        J => '1', K => '1', 
+        CLK => clk_in, RESET => reset, 
+        Q => open, Q_bar => q_bar_temp(0)
+    );
+
+    -- Stage ที่ 1 ถึง 26: ใช้ลูป generate สร้างโครงสร้างการต่อชนกันอัตโนมัติ
+    -- โดยเอาขา Q_bar ของตัวก่อนหน้า มาเป็น CLK ให้ตัวถัดไป
+    gen_divider: for i in 1 to 26 generate
+        FFi: JK_FF port map (
+            J => '1', K => '1', 
+            CLK => q_bar_temp(i-1), RESET => reset, 
+            Q => open, Q_bar => q_bar_temp(i)
+        );
+    end generate;
+
+    -- ส่งสัญญาณที่ถูกหารแล้วความถี่ต่ำสุดออกไป
+    clk_out <= q_bar_temp(26);
+
+end Structural;
