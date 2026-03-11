@@ -1,0 +1,68 @@
+library IEEE;
+use IEEE.STD_LOGIC_1164.ALL;
+
+entity tb_Combination1 is
+-- Testbench ไม่มี Port
+end tb_Combination1;
+
+architecture Behavioral of tb_Combination1 is
+
+    -- 1. ประกาศ Component ของโมดูลหลัก (Top Module)
+    component Combination1
+        Port ( D        : in  STD_LOGIC_VECTOR (7 downto 0);
+               sseg_sel : in  STD_LOGIC_VECTOR (3 downto 0);
+               sseg     : out STD_LOGIC_VECTOR (6 downto 0);
+               sseg_en  : out STD_LOGIC_VECTOR (3 downto 0));
+    end component;
+
+    -- 2. สร้าง Signals ไว้จำลองการป้อนค่า
+    signal D_tb        : STD_LOGIC_VECTOR (7 downto 0) := "00000000";
+    signal sseg_sel_tb : STD_LOGIC_VECTOR (3 downto 0) := "0000";
+    
+    -- Signals สำหรับรับค่า Output
+    signal sseg_tb     : STD_LOGIC_VECTOR (6 downto 0);
+    signal sseg_en_tb  : STD_LOGIC_VECTOR (3 downto 0);
+
+begin
+
+    -- 3. ทำการ Port Map เชื่อมเข้ากับวงจร Combination1
+    uut: Combination1 port map (
+        D        => D_tb,
+        sseg_sel => sseg_sel_tb,
+        sseg     => sseg_tb,
+        sseg_en  => sseg_en_tb
+    );
+
+    -- 4. กระบวนการจำลองพฤติกรรม (Stimulus)
+    stim_proc: process
+    begin
+        -- ตั้งค่า sseg_sel ให้เลือกเปิดไฟ 7-segment หลักขวาสุด (Digit 0)
+        -- วงจรเราเขียนไว้ว่า sseg_en <= not sseg_sel 
+        -- ดังนั้นป้อน "0001" จะทำให้ sseg_en ออกมาเป็น "1110" (ไฟติดที่ขวาสุด)
+        sseg_sel_tb <= "0001"; 
+
+        -- กรณีที่ 1: ไม่มีสวิตช์ไหนถูกกดเลย (D=0)
+        -- คาดหวัง: Encoder ออก 0 -> 7-Segment แสดงเลข 0 (sseg = 1000000)
+        D_tb <= "00000000"; 
+        wait for 50 ns;
+
+        -- กรณีที่ 2: กดสวิตช์ตำแหน่งที่ 4
+        -- คาดหวัง: Encoder ออก 4 -> 7-Segment แสดงเลข 4 (sseg = 0011001)
+        D_tb <= "00010000"; 
+        wait for 50 ns;
+
+        -- กรณีที่ 3: ทดสอบ Priority (กดสวิตช์ 7 และ 2 พร้อมกัน)
+        -- คาดหวัง: วงจรต้องเลือกบิต 7 -> 7-Segment แสดงเลข 7 (sseg = 1111000)
+        D_tb <= "10000100"; 
+        wait for 50 ns;
+
+        -- กรณีที่ 4: เปลี่ยนไปแสดงผลที่หน้าจอ 7-segment หลักซ้ายสุดบ้าง
+        -- ป้อน "1000" -> sseg_en จะเป็น "0111" (ไฟติดที่ซ้ายสุด)
+        sseg_sel_tb <= "1000"; 
+        D_tb <= "00001000"; -- กดสวิตช์ที่ 3 -> แสดงเลข 3 (sseg = 0110000)
+        wait for 50 ns;
+
+        wait; -- จบการจำลอง
+    end process;
+
+end Behavioral;
