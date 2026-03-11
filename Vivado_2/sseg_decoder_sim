@@ -1,0 +1,68 @@
+library IEEE;
+use IEEE.STD_LOGIC_1164.ALL;
+
+entity tb_sseg_decoder is
+-- Testbench ไม่มี Port
+end tb_sseg_decoder;
+
+architecture Behavioral of tb_sseg_decoder is
+
+    -- 1. ประกาศ Component ของ sseg_decoder
+    component sseg_decoder
+        Port ( bin      : in  STD_LOGIC_VECTOR (3 downto 0);
+               sseg_sel : in  STD_LOGIC_VECTOR (3 downto 0);
+               sseg     : out STD_LOGIC_VECTOR (6 downto 0);
+               sseg_en  : out STD_LOGIC_VECTOR (3 downto 0));
+    end component;
+
+    -- 2. สร้าง Signals ไว้จำลองการป้อนค่าและรับค่า
+    signal bin_tb      : STD_LOGIC_VECTOR (3 downto 0) := "0000";
+    signal sseg_sel_tb : STD_LOGIC_VECTOR (3 downto 0) := "0000";
+    
+    signal sseg_tb     : STD_LOGIC_VECTOR (6 downto 0);
+    signal sseg_en_tb  : STD_LOGIC_VECTOR (3 downto 0);
+
+begin
+
+    -- 3. Port Map เชื่อมวงจรเข้าด้วยกัน
+    uut: sseg_decoder port map (
+        bin      => bin_tb,
+        sseg_sel => sseg_sel_tb,
+        sseg     => sseg_tb,
+        sseg_en  => sseg_en_tb
+    );
+
+    -- 4. กระบวนการจำลองพฤติกรรม (Stimulus)
+    stim_proc: process
+    begin
+        -- ตั้งค่า sseg_sel ให้เลือกแสดงผลที่หลักแรก (หลักหน่วย / ขวาสุด)
+        -- วงจรเราเขียนไว้ว่า sseg_en <= not sseg_sel
+        -- ดังนั้นป้อน "0001" จะทำให้ sseg_en ออกมาเป็น "1110" (ไฟติดที่ขวาสุด)
+        sseg_sel_tb <= "0001"; 
+
+        -- ทดสอบป้อนค่า 0-9 และ A-F (เปลี่ยนค่าทุกๆ 20 ns)
+        
+        bin_tb <= "0000"; wait for 20 ns; -- เลข 0 คาดหวัง sseg: 1000000
+        bin_tb <= "0001"; wait for 20 ns; -- เลข 1 คาดหวัง sseg: 1111001
+        bin_tb <= "0010"; wait for 20 ns; -- เลข 2 คาดหวัง sseg: 0100100
+        bin_tb <= "0011"; wait for 20 ns; -- เลข 3 คาดหวัง sseg: 0110000
+        
+        bin_tb <= "0100"; wait for 20 ns; -- เลข 4 คาดหวัง sseg: 0011001
+        bin_tb <= "0101"; wait for 20 ns; -- เลข 5 คาดหวัง sseg: 0010010
+        bin_tb <= "0110"; wait for 20 ns; -- เลข 6 คาดหวัง sseg: 0000010
+        bin_tb <= "0111"; wait for 20 ns; -- เลข 7 คาดหวัง sseg: 1111000
+        
+        bin_tb <= "1000"; wait for 20 ns; -- เลข 8 คาดหวัง sseg: 0000000
+        bin_tb <= "1001"; wait for 20 ns; -- เลข 9 คาดหวัง sseg: 0010000
+        
+        bin_tb <= "1010"; wait for 20 ns; -- ตัวอักษร A คาดหวัง sseg: 0001000
+        bin_tb <= "1011"; wait for 20 ns; -- ตัวอักษร b คาดหวัง sseg: 0000011
+        bin_tb <= "1100"; wait for 20 ns; -- ตัวอักษร C คาดหวัง sseg: 1000110
+        bin_tb <= "1101"; wait for 20 ns; -- ตัวอักษร d คาดหวัง sseg: 0100001
+        bin_tb <= "1110"; wait for 20 ns; -- ตัวอักษร E คาดหวัง sseg: 0000110
+        bin_tb <= "1111"; wait for 20 ns; -- ตัวอักษร F คาดหวัง sseg: 0001110
+
+        wait; -- จบการจำลอง
+    end process;
+
+end Behavioral;
