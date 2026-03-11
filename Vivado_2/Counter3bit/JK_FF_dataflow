@@ -1,0 +1,45 @@
+library IEEE;
+use IEEE.STD_LOGIC_1164.ALL;
+
+entity JK_FF is
+    Port ( J     : in  STD_LOGIC;
+           K     : in  STD_LOGIC;
+           CLK   : in  STD_LOGIC;
+           RESET : in  STD_LOGIC;
+           Q     : out STD_LOGIC;
+           Q_bar : out STD_LOGIC);
+end JK_FF;
+
+architecture Dataflow of JK_FF is
+    signal reset_bar : STD_LOGIC;
+    signal clk_inv   : STD_LOGIC;
+    
+    -- สายไฟภายใน
+    signal m_s_nand, m_r_nand : STD_LOGIC;
+    signal m_q     : STD_LOGIC := '0';
+    signal m_q_bar : STD_LOGIC := '1';
+    
+    signal s_s_nand, s_r_nand : STD_LOGIC;
+    signal s_q     : STD_LOGIC := '0';
+    signal s_q_bar : STD_LOGIC := '1';
+begin
+    reset_bar <= not RESET;
+    clk_inv   <= not CLK;
+
+    -- Master Latch (รับค่าเมื่อ CLK = '0')
+    m_s_nand <= not (J and s_q_bar and clk_inv and reset_bar);
+    m_r_nand <= not (K and s_q     and clk_inv);
+    
+    m_q_bar  <= not (m_r_nand and m_q and reset_bar);
+    m_q      <= not (m_s_nand and m_q_bar);
+
+    -- Slave Latch (ส่งค่าออกเมื่อ CLK = '1')
+    s_s_nand <= not (m_q and CLK and reset_bar);
+    s_r_nand <= not (m_q_bar and CLK);
+    
+    s_q_bar  <= not (s_r_nand and s_q and reset_bar);
+    s_q      <= not (s_s_nand and s_q_bar);
+
+    Q     <= s_q;
+    Q_bar <= s_q_bar;
+end Dataflow;
