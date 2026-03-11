@@ -1,0 +1,47 @@
+library IEEE;
+use IEEE.STD_LOGIC_1164.ALL;
+
+entity tb_five_bit_adder is
+-- Testbench ไม่มี Port
+end tb_five_bit_adder;
+
+architecture Behavioral of tb_five_bit_adder is
+
+    component five_bit_adder
+        Port ( A    : in  STD_LOGIC_VECTOR (4 downto 0);
+               B    : in  STD_LOGIC_VECTOR (4 downto 0);
+               Cin  : in  STD_LOGIC;
+               Sum  : out STD_LOGIC_VECTOR (4 downto 0);
+               Cout : out STD_LOGIC);
+    end component;
+
+    -- Signals สำหรับเชื่อมต่อ
+    signal A_tb, B_tb   : STD_LOGIC_VECTOR (4 downto 0) := "00000";
+    signal Cin_tb       : STD_LOGIC := '0';
+    signal Sum_tb       : STD_LOGIC_VECTOR (4 downto 0);
+    signal Cout_tb      : STD_LOGIC;
+
+begin
+
+    uut: five_bit_adder port map (
+        A => A_tb, B => B_tb, Cin => Cin_tb, Sum => Sum_tb, Cout => Cout_tb
+    );
+
+    stim_proc: process
+    begin
+        -- กรณีที่ 1: 00001 + 00010 + 0 = 00011 (1 + 2 = 3)
+        A_tb <= "00001"; B_tb <= "00010"; Cin_tb <= '0'; wait for 10 ns;
+        
+        -- กรณีที่ 2: 01010 + 00101 + 0 = 01111 (10 + 5 = 15)
+        A_tb <= "01010"; B_tb <= "00101"; Cin_tb <= '0'; wait for 10 ns;
+        
+        -- กรณีที่ 3: 11111 + 00001 + 0 = 00000 และ Cout=1 (31 + 1 = 32 ซึ่งเกิน 5 บิต จะได้ผลเป็น 0 และตัวทดเป็น 1)
+        A_tb <= "11111"; B_tb <= "00001"; Cin_tb <= '0'; wait for 10 ns;
+        
+        -- กรณีที่ 4: 11111 + 11111 + 1 = 11111 และ Cout=1 (31 + 31 + 1 = 63)
+        A_tb <= "11111"; B_tb <= "11111"; Cin_tb <= '1'; wait for 10 ns;
+
+        wait;
+    end process;
+
+end Behavioral;
